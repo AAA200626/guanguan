@@ -1,0 +1,10 @@
+﻿build/
+.dart_tool/
+.idea/
+.gradle/
+__pycache__/
+output/
+*.apk
+*.keystore
+*.jks
+*.pyc
