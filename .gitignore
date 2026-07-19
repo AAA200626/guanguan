@@ -1,0 +1,15 @@
+﻿build/
+.dart_tool/
+.idea/
+.gradle/
+__pycache__/
+output/
+*.apk
+*.keystore
+*.jks
+*.pyc
+
+# Security: never commit key/secret info files
+*密钥*
+*secret*
+*key*

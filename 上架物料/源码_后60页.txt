@@ -1,0 +1,2986 @@
+/// 存钱方法模型
+class SavingMethod {
+  final String id;
+  final String name;
+  final String description;
+  final String difficulty; // easy / medium / hard
+  final String ruleType; // daily / weekly / monthly
+  final double estimatedAnnual; // 预计年存金额（基于默认参数）
+  final String icon; // 图标标识
+  final String suitableFor; // 适合人群描述
+
+  const SavingMethod({
+    required this.id,
+    required this.name,
+    required this.description,
+    required this.difficulty,
+    required this.ruleType,
+    required this.estimatedAnnual,
+    required this.icon,
+    required this.suitableFor,
+  });
+
+  /// 获取难度星级
+  int get difficultyStars {
+    switch (difficulty) {
+      case 'easy':
+        return 1;
+      case 'medium':
+        return 2;
+      case 'hard':
+        return 3;
+      default:
+        return 1;
+    }
+  }
+
+  /// 获取难度显示文本
+  String get difficultyLabel {
+    switch (difficulty) {
+      case 'easy':
+        return '轻松';
+      case 'medium':
+        return '适中';
+      case 'hard':
+        return '挑战';
+      default:
+        return difficulty;
+    }
+  }
+
+  /// 默认的 6 种存钱方法
+  static List<SavingMethod> get defaultMethods => [
+        const SavingMethod(
+          id: '365_days',
+          name: '365天存钱法',
+          description: '第1天存1元，第2天存2元，每天递增1元。越存越多，年底收获大惊喜！',
+          difficulty: 'hard',
+          ruleType: 'daily',
+          estimatedAnnual: 66795,
+          icon: 'calendar',
+          suitableFor: '收入稳定的上班族',
+        ),
+        const SavingMethod(
+          id: '52_weeks',
+          name: '52周存钱法',
+          description: '第1周存10元，每周递增10元。从轻松开始，逐步养成存钱习惯。',
+          difficulty: 'medium',
+          ruleType: 'weekly',
+          estimatedAnnual: 13780,
+          icon: 'trending_up',
+          suitableFor: '学生党、职场新人',
+        ),
+        const SavingMethod(
+          id: 'month_countdown',
+          name: '月份倒数法',
+          description: '每月按天数倒序存钱：1号存30元→30号存1元。越到后面越轻松！',
+          difficulty: 'easy',
+          ruleType: 'daily',
+          estimatedAnnual: 5580,
+          icon: 'arrow_downward',
+          suitableFor: '学生党、零花钱存钱',
+        ),
+        const SavingMethod(
+          id: '333_rule',
+          name: '333存钱法',
+          description: '每月收入分3份：1/3储蓄 + 1/3日常开支 + 1/3投资理财。先储蓄再消费！',
+          difficulty: 'medium',
+          ruleType: 'monthly',
+          estimatedAnnual: 0, // 取决于收入
+          icon: 'pie_chart',
+          suitableFor: '所有人群，简单好记',
+        ),
+        const SavingMethod(
+          id: '6_jars',
+          name: '6罐存钱法',
+          description: '将收入分6个虚拟罐子：生活55%、财务自由10%、教育10%、长期10%、娱乐10%、社交5%。',
+          difficulty: 'hard',
+          ruleType: 'monthly',
+          estimatedAnnual: 0, // 取决于收入
+          icon: 'grid_view',
+          suitableFor: '想全面规划财务的上班族',
+        ),
+        const SavingMethod(
+          id: '12_cd',
+          name: '12存单法',
+          description: '每月存一笔1年定期，坚持12个月。次年每月都有一笔到期，兼顾收益与灵活。',
+          difficulty: 'medium',
+          ruleType: 'monthly',
+          estimatedAnnual: 0,
+          icon: 'account_balance',
+          suitableFor: '有稳定收入、想强制储蓄的人',
+        ),
+        const SavingMethod(
+          id: '10_percent',
+          name: '10%强制储蓄法',
+          description: '每月发薪后立刻转出10%到储蓄账户，剩下的才是可花的。先存后花！',
+          difficulty: 'easy',
+          ruleType: 'monthly',
+          estimatedAnnual: 0,
+          icon: 'lock',
+          suitableFor: '所有人，最简单有效的存钱法',
+        ),
+        const SavingMethod(
+          id: 'round_up',
+          name: '整数取整法',
+          description: '每次消费向上取整，差额自动存起来。花69存1元，花480存20元。无痛攒钱！',
+          difficulty: 'easy',
+          ruleType: 'daily',
+          estimatedAnnual: 3650,
+          icon: 'autorenew',
+          suitableFor: '经常小额消费的人，不知不觉攒一笔',
+        ),
+        const SavingMethod(
+          id: 'dream_jar',
+          name: '梦想储蓄罐',
+          description: '为一个具体梦想存钱（旅行/手机/礼物），设定目标和截止日，每天为梦想存一点。',
+          difficulty: 'easy',
+          ruleType: 'daily',
+          estimatedAnnual: 0,
+          icon: 'favorite',
+          suitableFor: '有明确愿望和目标的人',
+        ),
+        const SavingMethod(
+          id: 'pretend_save',
+          name: '假装存钱法',
+          description: '设定虚拟剧情（养娃/养宠/穿越），按剧情"花费"实为存钱。沉浸式攒钱游戏！',
+          difficulty: 'medium',
+          ruleType: 'daily',
+          estimatedAnnual: 7300,
+          icon: 'theater_comedy',
+          suitableFor: '喜欢趣味、难以坚持传统存钱的人',
+        ),
+        const SavingMethod(
+          id: 'bet_save',
+          name: '对赌存钱法',
+          description: '和朋友约定每月存钱目标，没完成就请客。外部压力是最强的动力！',
+          difficulty: 'hard',
+          ruleType: 'monthly',
+          estimatedAnnual: 0,
+          icon: 'handshake',
+          suitableFor: '需要外部监督和动力的人',
+        ),
+        const SavingMethod(
+          id: 'weekday_cycle',
+          name: '星期存钱法',
+          description: '周一存10、周二20...周日70。每周循环，轻松无压力！',
+          difficulty: 'easy',
+          ruleType: 'daily',
+          estimatedAnnual: 14560,
+          icon: 'loop',
+          suitableFor: '喜欢规律节奏、每周循环的人',
+        ),
+        const SavingMethod(
+          id: '1234_rule',
+          name: '1234存钱法',
+          description: '收入分四份：10%消费+20%保障+30%投资+40%长期储蓄。存下70%！',
+          difficulty: 'hard',
+          ruleType: 'monthly',
+          estimatedAnnual: 0,
+          icon: 'account_tree',
+          suitableFor: '想系统规划财务、高储蓄率的人',
+        ),
+      ];
+}
+
+/// 打卡记录模型
+class SavingRecord {
+  final int? id;
+  final int planId;
+  final DateTime date;
+  final double amount;
+  final bool isCompleted;
+
+  const SavingRecord({
+    this.id,
+    required this.planId,
+    required this.date,
+    required this.amount,
+    this.isCompleted = false,
+  });
+
+  SavingRecord copyWith({
+    int? id,
+    int? planId,
+    DateTime? date,
+    double? amount,
+    bool? isCompleted,
+  }) {
+    return SavingRecord(
+      id: id ?? this.id,
+      planId: planId ?? this.planId,
+      date: date ?? this.date,
+      amount: amount ?? this.amount,
+      isCompleted: isCompleted ?? this.isCompleted,
+    );
+  }
+}
+
+/// 用户存钱计划模型
+class UserPlan {
+  final int? id;
+  final String methodId;
+  final String methodName;
+  final DateTime startDate;
+  final double targetAmount;
+  final double savedAmount;
+  final String status; // active / completed / paused
+
+  const UserPlan({
+    this.id,
+    required this.methodId,
+    required this.methodName,
+    required this.startDate,
+    required this.targetAmount,
+    this.savedAmount = 0,
+    this.status = 'active',
+  });
+
+  double get progressPercent =>
+      targetAmount > 0 ? savedAmount / targetAmount : 0;
+
+  UserPlan copyWith({
+    int? id,
+    String? methodId,
+    String? methodName,
+    DateTime? startDate,
+    double? targetAmount,
+    double? savedAmount,
+    String? status,
+  }) {
+    return UserPlan(
+      id: id ?? this.id,
+      methodId: methodId ?? this.methodId,
+      methodName: methodName ?? this.methodName,
+      startDate: startDate ?? this.startDate,
+      targetAmount: targetAmount ?? this.targetAmount,
+      savedAmount: savedAmount ?? this.savedAmount,
+      status: status ?? this.status,
+    );
+  }
+}
+
+/// 智能推荐结果
+class SavingRecommendation {
+  final SavingMethod method;
+  final double expectedAnnual; // 预计年存
+  final String reason; // 推荐理由
+
+  const SavingRecommendation({
+    required this.method,
+    required this.expectedAnnual,
+    required this.reason,
+  });
+}
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../models/saving_method.dart';
+import '../utils/saving_calculator.dart';
+import '../utils/saving_recommender.dart';
+import '../utils/database_helper.dart';
+
+/// 底部导航 tab 索引（0=首页, 1=挑战, 2=我的）
+final bottomTabIndexProvider = StateProvider<int>((ref) => 0);
+
+/// 用户昵称
+final userNameProvider = StateProvider<String>((ref) => '存钱达人');
+
+/// 自定义单日金额 Map<"YYYY-MM-DD", amount>
+final customDayAmountsProvider =
+    StateProvider<Map<String, double>>((ref) => {});
+
+/// 选中的存钱方法
+final selectedMethodProvider = StateProvider<SavingMethod?>((ref) => null);
+
+/// 月收入（用于智能推荐）
+final monthlyIncomeProvider = StateProvider<double>((ref) => 5000);
+
+/// 每月存钱目标（¥）
+final monthlyTargetProvider = StateProvider<double>((ref) => 3000);
+
+/// 存钱偏好：easy / medium / hard
+final savingPreferenceProvider = StateProvider<String>((ref) => 'medium');
+
+/// 当前活跃的存钱计划（从DB加载）
+final activePlanProvider = StateProvider<UserPlan?>((ref) => null);
+
+/// DB加载完成的标记
+final dbLoadedProvider = StateProvider<bool>((ref) => false);
+
+/// 从数据库加载所有数据
+final loadFromDatabase = FutureProvider<void>((ref) async {
+  final plan = await DatabaseHelper.instance.getActivePlan();
+  if (plan != null) {
+    ref.read(activePlanProvider.notifier).state = plan;
+    final records = await DatabaseHelper.instance.getRecordsByPlan(plan.id!);
+    ref.read(checkInRecordsProvider.notifier).state = records;
+  }
+  ref.read(dbLoadedProvider.notifier).state = true;
+});
+
+/// 智能推荐结果
+final recommendationsProvider = Provider<List<SavingRecommendation>>((ref) {
+  final income = ref.watch(monthlyIncomeProvider);
+  final preference = ref.watch(savingPreferenceProvider);
+  return SavingRecommender.recommend(income, preference: preference);
+});
+
+/// 所有存钱方法列表
+final savingMethodsProvider =
+    Provider<List<SavingMethod>>((ref) => SavingMethod.defaultMethods);
+
+/// 打卡记录列表（当前计划的打卡记录）
+final checkInRecordsProvider = StateProvider<List<SavingRecord>>((ref) => []);
+
+/// 今日应存金额
+final todayAmountProvider = Provider<double>((ref) {
+  final income = ref.watch(monthlyIncomeProvider);
+  return SavingCalculator.dailyAmount('daily', monthlyIncome: income);
+});
+
+/// 创建计划并保存到数据库
+Future<UserPlan> createPlan(UserPlan plan) async {
+  final id = await DatabaseHelper.instance.insertPlan(plan);
+  return plan.copyWith(id: id);
+}
+
+/// 保存打卡记录到数据库
+Future<void> saveRecord(SavingRecord record) async {
+  await DatabaseHelper.instance.insertRecord(record);
+}
+
+/// 更新计划到数据库
+Future<void> updatePlanDb(UserPlan plan) async {
+  await DatabaseHelper.instance.updatePlan(plan);
+}
+import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../theme/colors.dart';
+import '../theme/typography.dart';
+import '../models/saving_method.dart';
+import '../utils/saving_calculator.dart';
+import '../providers/saving_provider.dart';
+import '../utils/database_helper.dart';
+import '../widgets/progress_ring.dart';
+
+/// 挑战详情页 — 每日打卡核心界面
+class ChallengeDetailScreen extends ConsumerStatefulWidget {
+  final UserPlan plan;
+
+  const ChallengeDetailScreen({super.key, required this.plan});
+
+  @override
+  ConsumerState<ChallengeDetailScreen> createState() =>
+      _ChallengeDetailScreenState();
+}
+
+class _ChallengeDetailScreenState
+    extends ConsumerState<ChallengeDetailScreen> {
+  late UserPlan _plan;
+
+  @override
+  void initState() {
+    super.initState();
+    _plan = widget.plan;
+    _loadRecords();
+  }
+
+  Future<void> _loadRecords() async {
+    if (_plan.id == null) return;
+    final records = await DatabaseHelper.instance.getRecordsByPlan(_plan.id!);
+    if (mounted) {
+      ref.read(checkInRecordsProvider.notifier).state = records;
+      // 同步已存金额
+      final totalSaved = records.fold(0.0, (sum, r) => sum + r.amount);
+      setState(() {
+        _plan = _plan.copyWith(savedAmount: totalSaved);
+      });
+      ref.read(activePlanProvider.notifier).state = _plan;
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final method =
+        SavingMethod.defaultMethods.firstWhere((m) => m.id == _plan.methodId);
+    final records = ref.watch(checkInRecordsProvider);
+    final monthlyIncome = ref.watch(monthlyIncomeProvider);
+
+    // 计算当前周期
+    final now = DateTime.now();
+    final startDate = _plan.startDate;
+    final daysSinceStart = now.difference(startDate).inDays;
+    final currentPeriodIndex = daysSinceStart.clamp(0, 999999);
+
+    final customAmounts = ref.watch(customDayAmountsProvider);
+    final todayStr = '${now.year}-${_pad(now.month)}-${_pad(now.day)}';
+    final defaultAmount = SavingCalculator.getAmountForPeriod(
+        method.id, currentPeriodIndex,
+        monthlyIncome: monthlyIncome);
+    final todayAmount = customAmounts[todayStr] ?? defaultAmount;
+    final isTodayChecked = records.any((r) =>
+        r.date.year == now.year &&
+        r.date.month == now.month &&
+        r.date.day == now.day);
+
+    return Scaffold(
+      backgroundColor: AppColors.backgroundGrey,
+      appBar: AppBar(
+        title: Text(_plan.methodName),
+      ),
+      body: SafeArea(
+        child: SingleChildScrollView(
+        padding: const EdgeInsets.symmetric(vertical: 16),
+        child: Column(
+          children: [
+            // 总进度卡片
+            Card(
+              child: Padding(
+                padding: const EdgeInsets.all(24),
+                child: Column(
+                  children: [
+                    Text(
+                      '第 ${currentPeriodIndex + 1} ${_periodUnit(method.ruleType)}',
+                      style: AppTypography.caption.copyWith(
+                        color: AppColors.primary,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                    const SizedBox(height: 20),
+                    ProgressRing(
+                      progress: _plan.progressPercent,
+                      size: 150,
+                      strokeWidth: 12,
+                      centerChild: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Text(
+                            '¥${_plan.savedAmount.round()}',
+                            style: AppTypography.h2,
+                          ),
+                          const SizedBox(height: 2),
+                          Text(
+                            '目标 ¥${_plan.targetAmount.round()}',
+                            style: AppTypography.caption,
+                          ),
+                        ],
+                      ),
+                    ),
+                    const SizedBox(height: 16),
+                    Text(
+                      '${(_plan.progressPercent * 100).toStringAsFixed(1)}% 完成',
+                      style: AppTypography.h3.copyWith(
+                        color: AppColors.primary,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+
+            const SizedBox(height: 16),
+
+            // 今日/今月打卡卡片
+            Card(
+              margin: const EdgeInsets.symmetric(horizontal: 20),
+              child: Padding(
+                padding: const EdgeInsets.all(24),
+                child: Column(
+                  children: [
+                    Text(
+                      _isMonthlyMethod(method.id) ? '📅 本月 ${now.year}/${now.month}' : '📅 今天 $todayStr',
+                      style: AppTypography.caption,
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      SavingCalculator.getPeriodLabel(
+                          method.id, currentPeriodIndex),
+                      style: AppTypography.h3,
+                    ),
+                    const SizedBox(height: 12),
+                    Text(
+                      _isMonthlyMethod(method.id) ? '今月存入' : '今日存入',
+                      style: AppTypography.caption,
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      '¥ ${todayAmount.toStringAsFixed(0)}',
+                      style: AppTypography.amount.copyWith(
+                        color: isTodayChecked
+                            ? AppColors.textLight
+                            : AppColors.primary,
+                      ),
+                    ),
+                    const SizedBox(height: 20),
+                    // 打卡按钮
+                    SizedBox(
+                      width: double.infinity,
+                      child: ElevatedButton(
+                        onPressed: isTodayChecked
+                            ? null
+                            : () => _doCheckIn(todayAmount),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: isTodayChecked
+                              ? AppColors.backgroundGrey
+                              : AppColors.primary,
+                          foregroundColor: isTodayChecked
+                              ? AppColors.textLight
+                              : Colors.white,
+                          disabledBackgroundColor: AppColors.backgroundGrey,
+                          disabledForegroundColor: AppColors.textLight,
+                          padding: const EdgeInsets.symmetric(vertical: 16),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(14),
+                          ),
+                        ),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Icon(
+                              isTodayChecked
+                                  ? Icons.check_circle_rounded
+                                  : Icons.touch_app_rounded,
+                              size: 22,
+                            ),
+                            const SizedBox(width: 8),
+                            Text(
+                              isTodayChecked
+                                  ? (_isMonthlyMethod(method.id) ? '今月已打卡 ✓' : '今日已打卡 ✓')
+                                  : '打卡',
+                              style: const TextStyle(
+                                fontSize: 18,
+                                fontWeight: FontWeight.w700,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+
+            const SizedBox(height: 16),
+
+            // 日历（日/周法显示天，月存法显示月）
+            _buildCalendar(method.id, records, monthlyIncome),
+            const SizedBox(height: 16),
+            // 最近记录
+            Card(
+              child: Padding(
+                padding: const EdgeInsets.all(20),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Text('📝 最近记录', style: AppTypography.h3),
+                    const SizedBox(height: 12),
+                    if (records.isEmpty)
+                      Padding(
+                        padding: const EdgeInsets.symmetric(vertical: 16),
+                        child: Center(
+                          child: Text(
+                            '还没有打卡记录，今天开始吧！',
+                            style: AppTypography.caption,
+                          ),
+                        ),
+                      )
+                    else
+                      ...records.reversed.take(5).map((r) => Padding(
+                            padding: const EdgeInsets.only(bottom: 8),
+                            child: Row(
+                              children: [
+                                Icon(Icons.check_circle_rounded,
+                                    size: 18,
+                                    color: r.isCompleted
+                                        ? AppColors.primary
+                                        : AppColors.textLight),
+                                const SizedBox(width: 8),
+                                Text(
+                                  '${r.date.month}/${r.date.day}',
+                                  style: AppTypography.body,
+                                ),
+                                const Spacer(),
+                                Text(
+                                  '¥${r.amount.round()}',
+                                  style: AppTypography.body.copyWith(
+                                    fontWeight: FontWeight.w600,
+                                    color: AppColors.primary,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          )),
+                  ],
+                ),
+              ),
+            ),
+
+            const SizedBox(height: 100),
+          ],
+        ),
+      ),
+      ),
+    );
+  }
+
+  String _periodUnit(String ruleType) {
+    switch (ruleType) {
+      case 'daily':
+        return '天';
+      case 'weekly':
+        return '周';
+      case 'monthly':
+        return '个月';
+      default:
+        return '';
+    }
+  }
+
+  String _pad(int n) => n.toString().padLeft(2, '0');
+
+  bool _isMonthlyMethod(String methodId) =>
+      methodId == '333_rule' || methodId == '6_jars' || methodId == '12_cd' ||
+      methodId == '10_percent' || methodId == '1234_rule' || methodId == 'bet_save';
+
+  Widget _buildCalendar(String methodId, List<SavingRecord> records, double income) {
+    final now = DateTime.now();
+    if (_isMonthlyMethod(methodId)) {
+      // 月存法：显示12个月
+      final checkedMonths = records.map((r) => r.date.month).toSet();
+      return Card(
+        margin: const EdgeInsets.symmetric(horizontal: 20),
+        child: Padding(
+          padding: const EdgeInsets.all(16),
+          child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+            Row(children: [
+              Text('📅 ${now.year}年', style: AppTypography.h3),
+              const Spacer(),
+              Text('${checkedMonths.length}/12 月', style: AppTypography.caption.copyWith(color: AppColors.primary)),
+            ]),
+            const SizedBox(height: 10),
+            Wrap(spacing: 6, runSpacing: 6, children: List.generate(12, (i) {
+              final m = i + 1;
+              final checked = checkedMonths.contains(m);
+              return Container(
+                width: (MediaQuery.of(context).size.width - 72) / 6,
+                padding: const EdgeInsets.symmetric(vertical: 8),
+                decoration: BoxDecoration(
+                  color: checked ? AppColors.primary : AppColors.backgroundGrey,
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: Text('${m}月', textAlign: TextAlign.center, style: TextStyle(
+                  fontSize: 12, fontWeight: FontWeight.w600,
+                  color: checked ? Colors.white : AppColors.textDark,
+                )),
+              );
+            })),
+          ]),
+        ),
+      );
+    }
+    // 日/周法：显示当月日历
+    final year = now.year;
+    final month = now.month;
+    final daysInMonth = DateTime(year, month + 1, 0).day;
+    final firstDow = DateTime(year, month, 1).weekday;
+    final checkedDays = records.where((r) => r.date.year == year && r.date.month == month).map((r) => r.date.day).toSet();
+    final rows = ((firstDow - 1 + daysInMonth) / 7).ceil();
+
+    return Card(
+      margin: const EdgeInsets.symmetric(horizontal: 20),
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+          Text('📅 ${year}年${month}月', style: AppTypography.h3),
+          const SizedBox(height: 10),
+          Row(children: ['一','二','三','四','五','六','日'].map((d) => Expanded(child: Center(child: Text(d, style: AppTypography.caption.copyWith(fontSize: 10))))).toList()),
+          const SizedBox(height: 4),
+          ...List.generate(rows, (r) => Padding(
+            padding: const EdgeInsets.only(bottom: 3),
+            child: Row(children: List.generate(7, (c) {
+              final day = r * 7 + c - firstDow + 2;
+              if (day < 1 || day > daysInMonth) return const Expanded(child: SizedBox.shrink());
+              final isChecked = checkedDays.contains(day);
+              final isToday = now.day == day;
+              return Expanded(child: Container(
+                margin: const EdgeInsets.all(2),
+                decoration: BoxDecoration(
+                  color: isChecked ? AppColors.primary : AppColors.backgroundGrey,
+                  borderRadius: BorderRadius.circular(5),
+                  border: isToday && !isChecked ? Border.all(color: AppColors.primary, width: 1.5) : null,
+                ),
+                child: AspectRatio(aspectRatio: 1,
+                  child: Center(child: Text('$day', style: TextStyle(fontSize: 11, fontWeight: isToday ? FontWeight.bold : FontWeight.normal,
+                      color: isChecked ? Colors.white : AppColors.textDark)))),
+              ));
+            })),
+          )),
+        ]),
+      ),
+    );
+  }
+
+  void _doCheckIn(double amount) async {
+    final now = DateTime.now();
+    final todayStr = '${now.year}-${_pad(now.month)}-${_pad(now.day)}';
+    final customAmounts = ref.read(customDayAmountsProvider);
+    final finalAmount = customAmounts[todayStr] ?? amount;
+
+    final record = SavingRecord(
+      planId: _plan.id ?? 0,
+      date: now,
+      amount: finalAmount,
+      isCompleted: true,
+    );
+
+    await saveRecord(record);
+    ref.read(checkInRecordsProvider.notifier).state = [
+      ...ref.read(checkInRecordsProvider), record,
+    ];
+
+    setState(() {
+      _plan = _plan.copyWith(savedAmount: _plan.savedAmount + finalAmount);
+    });
+    await updatePlanDb(_plan);
+    ref.read(activePlanProvider.notifier).state = _plan;
+
+    if (mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+        content: Text('🎉 打卡成功！+¥${finalAmount.round()}'),
+        backgroundColor: AppColors.primary,
+        behavior: SnackBarBehavior.floating,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+        duration: const Duration(seconds: 2),
+      ));
+    }
+  }
+}import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../theme/colors.dart';
+import '../theme/typography.dart';
+import '../models/saving_method.dart';
+import '../providers/saving_provider.dart';
+import '../utils/saving_calculator.dart';
+import 'method_setup_screen.dart';
+
+/// 挑战页 — 存钱方法列表 + 智能推荐入口
+class ChallengeScreen extends ConsumerWidget {
+  const ChallengeScreen({super.key});
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final methods = ref.watch(savingMethodsProvider);
+    final recommendations = ref.watch(recommendationsProvider);
+
+    return Scaffold(
+      appBar: AppBar(title: const Text('🎯 选择存钱方法')),
+      body: SafeArea(
+        child: SingleChildScrollView(
+        padding: const EdgeInsets.only(top: 12, bottom: 24),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // 收入输入卡片
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 14),
+              child: _IncomeCard(),
+            ),
+            // 推荐
+            if (recommendations.isNotEmpty) ...[
+              const SizedBox(height: 8),
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 14),
+                child: Row(children: [
+                  const Text('🤖 推荐', style: AppTypography.h3),
+                  const Spacer(),
+                  _PreferenceChips(),
+                ]),
+              ),
+              const SizedBox(height: 4),
+              ...recommendations.map((r) => _RecommendCard(recommendation: r)),
+              const SizedBox(height: 4),
+              const Divider(indent: 14, endIndent: 14),
+            ],
+            // ── 每月 ──
+            if (methods.where((m) => m.ruleType == 'monthly').isNotEmpty) ...[
+              const SizedBox(height: 4),
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 14),
+                child: const Text('📅 每月存钱', style: AppTypography.h3),
+              ),
+              const SizedBox(height: 2),
+              ...methods
+                  .where((m) => m.ruleType == 'monthly')
+                  .map((m) => _MethodCard(method: m, onTap: () => _goToSetup(context, ref, m))),
+              const SizedBox(height: 8),
+            ],
+            // ── 每日/每周 ──
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 14),
+              child: const Text('📍 每日/每周存钱', style: AppTypography.h3),
+            ),
+            const SizedBox(height: 2),
+            ...methods
+                .where((m) => m.ruleType != 'monthly')
+                .map((m) => _MethodCard(method: m, onTap: () => _goToSetup(context, ref, m))),
+          ],
+        ),
+      ),
+      ),
+    );
+  }
+
+  void _goToSetup(BuildContext context, WidgetRef ref, SavingMethod method) {
+    ref.read(selectedMethodProvider.notifier).state = method;
+    Navigator.push(
+      context,
+      MaterialPageRoute(builder: (_) => MethodSetupScreen(method: method)),
+    );
+  }
+}
+
+/// 偏好选择 Chips
+class _PreferenceChips extends ConsumerWidget {
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final current = ref.watch(savingPreferenceProvider);
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: ['easy', 'medium', 'hard'].map((p) {
+        final label = p == 'easy' ? '轻松' : p == 'medium' ? '适中' : '挑战';
+        final selected = current == p;
+        return Padding(
+          padding: const EdgeInsets.only(left: 6),
+          child: GestureDetector(
+            onTap: () => ref.read(savingPreferenceProvider.notifier).state = p,
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+              decoration: BoxDecoration(
+                color: selected ? AppColors.primary : AppColors.backgroundGrey,
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: Text(label, style: TextStyle(
+                fontSize: 12,
+                fontWeight: selected ? FontWeight.w600 : FontWeight.normal,
+                color: selected ? Colors.white : AppColors.textLight,
+              )),
+            ),
+          ),
+        );
+      }).toList(),
+    );
+  }
+}
+
+/// 紧凑收入输入卡片
+class _IncomeCard extends ConsumerStatefulWidget {
+  @override
+  ConsumerState<_IncomeCard> createState() => _IncomeCardState();
+}
+
+class _IncomeCardState extends ConsumerState<_IncomeCard> {
+  final _ctrl = TextEditingController();
+  bool _editing = false;
+
+  @override
+  void initState() {
+    super.initState();
+    final income = ref.read(monthlyIncomeProvider);
+    if (income > 0) _ctrl.text = income.round().toString();
+  }
+
+  @override
+  void dispose() {
+    _ctrl.dispose();
+    super.dispose();
+  }
+
+  void _submit() {
+    final v = double.tryParse(_ctrl.text);
+    if (v != null && v > 0) {
+      ref.read(monthlyIncomeProvider.notifier).state = v;
+      setState(() => _editing = false);
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final income = ref.watch(monthlyIncomeProvider);
+    final hasIncome = income > 0;
+
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        gradient: const LinearGradient(
+          colors: [AppColors.primary, AppColors.primaryLight],
+          begin: Alignment.topLeft, end: Alignment.bottomRight,
+        ),
+        borderRadius: BorderRadius.circular(16),
+      ),
+      child: _editing
+          ? Row(children: [
+              const Text('¥', style: TextStyle(fontSize: 20, color: Colors.white, fontWeight: FontWeight.bold)),
+              const SizedBox(width: 8),
+              Expanded(
+                child: TextField(
+                  controller: _ctrl,
+                  autofocus: true,
+                  keyboardType: TextInputType.number,
+                  style: const TextStyle(fontSize: 20, color: Colors.white, fontWeight: FontWeight.bold),
+                  decoration: const InputDecoration(
+                    hintText: '月收入',
+                    hintStyle: TextStyle(color: Colors.white60),
+                    border: InputBorder.none,
+                  ),
+                  onSubmitted: (_) => _submit(),
+                ),
+              ),
+              const SizedBox(width: 8),
+              GestureDetector(
+                onTap: _submit,
+                child: const Icon(Icons.check_circle, color: Colors.white, size: 28),
+              ),
+            ])
+          : GestureDetector(
+              onTap: () => setState(() => _editing = true),
+              child: Row(children: [
+                const Text('🤖', style: TextStyle(fontSize: 22)),
+                const SizedBox(width: 10),
+                Expanded(
+                  child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                    Text(hasIncome ? '月收入 ¥${income.round()}' : '点此输入月收入',
+                        style: const TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.w600)),
+                    const SizedBox(height: 2),
+                    Text(hasIncome ? '下方为智能推荐' : '输入后自动推荐存钱方案',
+                        style: const TextStyle(color: Colors.white70, fontSize: 12)),
+                  ]),
+                ),
+                const Icon(Icons.edit, color: Colors.white70, size: 18),
+              ]),
+            ),
+    );
+  }
+}
+
+/// 推荐结果卡片
+class _RecommendCard extends ConsumerWidget {
+  final SavingRecommendation recommendation;
+  const _RecommendCard({required this.recommendation});
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final m = recommendation.method;
+    final income = ref.watch(monthlyIncomeProvider);
+    final annual = income > 0 ? SavingCalculator.calculateAnnualTotal(m.id, monthlyIncome: income) : 0;
+    final daily = income > 0 ? SavingCalculator.calculateDailyAverage(m.id, monthlyIncome: income) : 0;
+
+    return Card(
+      margin: const EdgeInsets.symmetric(horizontal: 20, vertical: 3),
+      child: InkWell(
+        borderRadius: BorderRadius.circular(12),
+        onTap: () {
+          ref.read(selectedMethodProvider.notifier).state = m;
+          Navigator.push(context,
+              MaterialPageRoute(builder: (_) => MethodSetupScreen(method: m)));
+        },
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+          child: Row(children: [
+            const Icon(Icons.auto_awesome_rounded, color: AppColors.primary, size: 18),
+            const SizedBox(width: 8),
+            Expanded(child: Text(m.name, style: AppTypography.body.copyWith(fontWeight: FontWeight.w600))),
+            Text(
+              income > 0 ? '日均¥${daily.toStringAsFixed(0)}/年¥${annual.round()}' : '',
+              style: AppTypography.caption.copyWith(color: AppColors.primary, fontWeight: FontWeight.w600),
+            ),
+            const SizedBox(width: 4),
+            const Icon(Icons.chevron_right, color: AppColors.textLight, size: 16),
+          ]),
+        ),
+      ),
+    );
+  }
+}
+
+/// 存钱方法卡片（支持动态金额）
+class _MethodCard extends ConsumerWidget {
+  final SavingMethod method;
+  final VoidCallback onTap;
+  const _MethodCard({required this.method, required this.onTap});
+
+  IconData get _icon {
+    switch (method.icon) {
+      case 'calendar': return Icons.calendar_month_rounded;
+      case 'trending_up': return Icons.trending_up_rounded;
+      case 'arrow_downward': return Icons.arrow_downward_rounded;
+      case 'pie_chart': return Icons.pie_chart_rounded;
+      case 'grid_view': return Icons.grid_view_rounded;
+      case 'account_balance': return Icons.account_balance_rounded;
+      case 'lock': return Icons.lock_rounded;
+      case 'autorenew': return Icons.autorenew_rounded;
+      case 'favorite': return Icons.favorite_rounded;
+      case 'theater_comedy': return Icons.theater_comedy_rounded;
+      case 'handshake': return Icons.handshake_rounded;
+      case 'loop': return Icons.loop_rounded;
+      case 'account_tree': return Icons.account_tree_rounded;
+      default: return Icons.savings_rounded;
+    }
+  }
+
+  Color get _diffColor {
+    switch (method.difficulty) {
+      case 'easy': return AppColors.difficultyEasy;
+      case 'medium': return AppColors.difficultyMedium;
+      case 'hard': return AppColors.difficultyHard;
+      default: return AppColors.primary;
+    }
+  }
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final income = ref.watch(monthlyIncomeProvider);
+    final annual = income > 0
+        ? SavingCalculator.calculateAnnualTotal(method.id, monthlyIncome: income)
+        : 0;
+    final daily = income > 0
+        ? SavingCalculator.calculateDailyAverage(method.id, monthlyIncome: income)
+        : 0;
+    final isMonthly = method.ruleType == 'monthly';
+    final monthly = income > 0 ? SavingCalculator.calculateMonthlyTotal(method.id, monthlyIncome: income) : 0;
+    final is333 = method.id == '333_rule';
+    final amountText = income > 0
+        ? (isMonthly
+            ? '月存¥${is333 ? monthly.toStringAsFixed(2) : monthly.round()} · 年¥${is333 ? annual.toStringAsFixed(2) : annual.round()}'
+            : '日均¥${daily.toStringAsFixed(0)} · 年¥${annual.round()}')
+        : '输入收入后计算';
+
+    return Card(
+      margin: const EdgeInsets.symmetric(horizontal: 14, vertical: 3),
+      child: InkWell(
+        borderRadius: BorderRadius.circular(14),
+        onTap: onTap,
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+          child: Row(children: [
+            Container(
+              width: 40, height: 40,
+              decoration: BoxDecoration(
+                color: AppColors.primaryUltraLight,
+                borderRadius: BorderRadius.circular(10),
+              ),
+              child: Icon(_icon, color: AppColors.primary, size: 20),
+            ),
+            const SizedBox(width: 10),
+            Expanded(
+              child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                Text(method.name, style: AppTypography.body.copyWith(fontWeight: FontWeight.w600)),
+                const SizedBox(height: 2),
+                Text(amountText, style: AppTypography.caption.copyWith(color: AppColors.primary, fontWeight: FontWeight.w500)),
+              ]),
+            ),
+            Row(
+              mainAxisSize: MainAxisSize.min,
+              children: List.generate(3, (i) => Icon(Icons.star_rounded, size: 12,
+                  color: i < method.difficultyStars ? _diffColor : AppColors.textLight.withAlpha(40))),
+            ),
+          ]),
+        ),
+      ),
+    );
+  }
+}
+import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../theme/colors.dart';
+import '../theme/typography.dart';
+import '../models/saving_method.dart';
+import '../providers/saving_provider.dart';
+import '../utils/saving_calculator.dart';
+import '../widgets/progress_ring.dart';
+import 'challenge_detail_screen.dart';
+
+/// 首页 — 资产总览 + 当前计划
+class HomeScreen extends ConsumerWidget {
+  const HomeScreen({super.key});
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    // 启动时加载数据库数据
+    ref.watch(loadFromDatabase);
+
+    final activePlan = ref.watch(activePlanProvider);
+    final allSavings = _calculateAllSavings(ref);
+
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('罐罐'),
+      ),
+      body: SafeArea(
+        child: Column(
+          children: [
+            Padding(
+              padding: const EdgeInsets.fromLTRB(14, 12, 14, 0),
+              child: _TotalAssetCard(totalSaved: allSavings, plan: activePlan),
+            ),
+            const SizedBox(height: 8),
+            _CurrentPlanCard(plan: activePlan),
+          ],
+        ),
+      ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: () => _goToChallenge(ref),
+        backgroundColor: AppColors.primary,
+        child: const Icon(Icons.add, size: 28, color: Colors.white),
+      ),
+    );
+  }
+
+  double _calculateAllSavings(WidgetRef ref) {
+    final records = ref.watch(checkInRecordsProvider);
+    return records.fold(0, (sum, r) => sum + r.amount);
+  }
+
+  void _goToChallenge(WidgetRef ref) {
+    ref.read(bottomTabIndexProvider.notifier).state = 1;
+  }
+}
+
+String _padNum(int n) => n.toString().padLeft(2, '0');
+
+/// 在首页直接修改今日金额
+bool _isDailyMethod(String methodId) => methodId != '333_rule' && methodId != '6_jars' && methodId != '12_cd' && methodId != '10_percent' && methodId != '1234_rule' && methodId != 'bet_save';
+
+double _calcTodayAmount(WidgetRef ref, UserPlan plan) {
+  final now = DateTime.now();
+  final todayStr = '${now.year}-${_padNum(now.month)}-${_padNum(now.day)}';
+  final customAmounts = ref.read(customDayAmountsProvider);
+  if (customAmounts.containsKey(todayStr)) return customAmounts[todayStr]!;
+  final daysSinceStart = now.difference(plan.startDate).inDays;
+  final income = ref.read(monthlyIncomeProvider);
+  return SavingCalculator.getAmountForPeriod(plan.methodId, daysSinceStart.clamp(0, 999999), monthlyIncome: income);
+}
+
+void _editTodayAmount(BuildContext context, WidgetRef ref, UserPlan plan, double currentAmount) {
+  final ctrl = TextEditingController(text: currentAmount.toStringAsFixed(0));
+  showDialog(
+    context: context,
+    builder: (ctx) => AlertDialog(
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+      title: const Text('✏️ 修改今日金额'),
+      content: TextField(
+        controller: ctrl, autofocus: true, keyboardType: TextInputType.number,
+        style: AppTypography.amount.copyWith(fontSize: 28, color: AppColors.primary),
+        decoration: InputDecoration(prefixText: '¥ ', filled: true, fillColor: AppColors.backgroundGrey,
+            border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide.none)),
+      ),
+      actions: [
+        TextButton(onPressed: () => Navigator.pop(ctx), child: const Text('取消')),
+        ElevatedButton(
+          onPressed: () {
+            final v = double.tryParse(ctrl.text);
+            if (v != null && v > 0) {
+              final now = DateTime.now();
+              final key = '${now.year}-${_padNum(now.month)}-${_padNum(now.day)}';
+              final updated = Map<String, double>.from(ref.read(customDayAmountsProvider));
+              updated[key] = v;
+              ref.read(customDayAmountsProvider.notifier).state = updated;
+            }
+            Navigator.pop(ctx);
+          },
+          style: ElevatedButton.styleFrom(backgroundColor: AppColors.primary, foregroundColor: Colors.white,
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12))),
+          child: const Text('保存'),
+        ),
+      ],
+    ),
+  );
+}
+
+/// 直接打卡（不跳页）
+void _doDirectCheckIn(BuildContext context, WidgetRef ref, UserPlan plan) async {
+  final now = DateTime.now();
+  final records = ref.read(checkInRecordsProvider);
+
+  // 检查今日是否已打卡
+  final alreadyDone = records.any((r) =>
+      r.date.year == now.year && r.date.month == now.month && r.date.day == now.day);
+  if (alreadyDone) {
+    ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+      content: const Text('✅ 今日已打卡，明天继续加油！'),
+      backgroundColor: AppColors.primary,
+      behavior: SnackBarBehavior.floating,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+      duration: const Duration(seconds: 2),
+    ));
+    return;
+  }
+
+  // 计算今日金额（优先用自定义）
+  final todayStr = '${now.year}-${_padNum(now.month)}-${_padNum(now.day)}';
+  final customAmounts = ref.read(customDayAmountsProvider);
+  final daysSinceStart = now.difference(plan.startDate).inDays;
+  final income = ref.read(monthlyIncomeProvider);
+  final defaultAmt = SavingCalculator.getAmountForPeriod(plan.methodId, daysSinceStart.clamp(0, 999999), monthlyIncome: income);
+  final amount = customAmounts[todayStr] ?? defaultAmt;
+
+  final record = SavingRecord(planId: plan.id ?? 0, date: now, amount: amount, isCompleted: true);
+  await saveRecord(record);
+
+  ref.read(checkInRecordsProvider.notifier).state = [...records, record];
+  final updatedPlan = plan.copyWith(savedAmount: plan.savedAmount + amount);
+  ref.read(activePlanProvider.notifier).state = updatedPlan;
+  await updatePlanDb(updatedPlan);
+
+  if (context.mounted) {
+    ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+      content: Text('🎉 打卡成功！+¥${amount.round()}'),
+      backgroundColor: AppColors.primary,
+      behavior: SnackBarBehavior.floating,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+      duration: const Duration(seconds: 2),
+    ));
+  }
+}
+
+/// 总资产卡片
+class _TotalAssetCard extends ConsumerWidget {
+  final double totalSaved;
+  final UserPlan? plan;
+
+  const _TotalAssetCard({required this.totalSaved, required this.plan});
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final progress = plan != null && plan!.targetAmount > 0
+        ? totalSaved / plan!.targetAmount
+        : 0.0;
+    final hasProgress = plan != null;
+
+    return Card(
+      child: Padding(
+        padding: const EdgeInsets.all(18),
+        child: Column(
+          children: [
+            const Text('已存金额', style: AppTypography.caption),
+            const SizedBox(height: 4),
+            Text(
+              '¥ ${totalSaved.toStringAsFixed(0)}',
+              style: AppTypography.amount.copyWith(fontSize: 30),
+            ),
+            const SizedBox(height: 12),
+            ProgressRing(
+              progress: progress.clamp(0.0, 1.0),
+              size: 110,
+              strokeWidth: 8,
+            ),
+            const SizedBox(height: 8),
+            if (hasProgress)
+              Text(
+                '目标 ¥${plan!.targetAmount.round()}  ·  ${(progress * 100).toStringAsFixed(0)}%',
+                style: AppTypography.caption.copyWith(
+                  color: AppColors.primary,
+                  fontWeight: FontWeight.w600,
+                ),
+              )
+            else
+              Text(
+                '设置目标开始存钱吧 ✨',
+                style: AppTypography.caption.copyWith(
+                  color: AppColors.primary,
+                ),
+              ),
+            // 每日/每周法显示今日金额，月存法只显示打卡
+            if (plan != null) ...[
+              const SizedBox(height: 10),
+              if (_isDailyMethod(plan!.methodId)) ...[
+                GestureDetector(
+                  onTap: () => _editTodayAmount(context, ref, plan!, _calcTodayAmount(ref, plan!)),
+                  child: Row(mainAxisAlignment: MainAxisAlignment.center, children: [
+                    Text('今日 ¥${_calcTodayAmount(ref, plan!).toStringAsFixed(0)}',
+                        style: AppTypography.body.copyWith(color: AppColors.primary, fontWeight: FontWeight.w600)),
+                    const SizedBox(width: 4),
+                    const Icon(Icons.edit, size: 14, color: AppColors.textLight),
+                  ]),
+                ),
+                const SizedBox(height: 8),
+              ],
+              SizedBox(
+                width: double.infinity,
+                child: ElevatedButton(
+                  onPressed: () => _doDirectCheckIn(context, ref, plan!),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: AppColors.primary,
+                    foregroundColor: Colors.white,
+                    padding: const EdgeInsets.symmetric(vertical: 10),
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                  ),
+                  child: const Text('打卡', style: TextStyle(fontWeight: FontWeight.w700, fontSize: 15)),
+                ),
+              ),
+            ],
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+/// 当前计划卡片
+class _CurrentPlanCard extends ConsumerWidget {
+  final UserPlan? plan;
+
+  const _CurrentPlanCard({required this.plan});
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final records = ref.watch(checkInRecordsProvider);
+
+    return Card(
+      child: Padding(
+        padding: const EdgeInsets.all(14),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(children: [
+              const Text('📋 当前计划', style: AppTypography.h3),
+              const Spacer(),
+              if (plan != null)
+                GestureDetector(
+                  onTap: () => Navigator.push(context,
+                      MaterialPageRoute(builder: (_) => ChallengeDetailScreen(plan: plan!))),
+                  child: Text('详情 ›', style: AppTypography.caption.copyWith(color: AppColors.primary)),
+                ),
+            ]),
+            const SizedBox(height: 10),
+            if (plan != null) ...[
+              _ActivePlanContent(plan: plan!, records: records),
+            ] else ...[
+              _EmptyPlanContent(),
+            ],
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+/// 活跃计划内容
+class _ActivePlanContent extends StatelessWidget {
+  final UserPlan plan;
+  final List<SavingRecord> records;
+
+  const _ActivePlanContent({required this.plan, required this.records});
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      children: [
+        InkWell(
+          borderRadius: BorderRadius.circular(12),
+          onTap: () => Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (_) => ChallengeDetailScreen(plan: plan),
+            ),
+          ),
+          child: Container(
+            width: double.infinity,
+            padding: const EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              color: AppColors.primaryUltraLight,
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: Row(
+              children: [
+                Container(
+                  width: 44,
+                  height: 44,
+                  decoration: BoxDecoration(
+                    color: AppColors.primary,
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: const Icon(Icons.savings_rounded,
+                      color: Colors.white, size: 22),
+                ),
+                const SizedBox(width: 14),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(plan.methodName,
+                          style: AppTypography.h3
+                              .copyWith(color: AppColors.primary)),
+                      const SizedBox(height: 4),
+                      Text(
+                        '已存 ¥${plan.savedAmount.round()} · 打卡 ${records.length} 次',
+                        style: AppTypography.caption,
+                      ),
+                    ],
+                  ),
+                ),
+                const Icon(Icons.chevron_right, color: AppColors.primary),
+              ],
+            ),
+          ),
+        ),
+        const SizedBox(height: 12),
+        ClipRRect(
+          borderRadius: BorderRadius.circular(4),
+          child: LinearProgressIndicator(
+            value: plan.progressPercent,
+            backgroundColor: AppColors.primaryUltraLight,
+            color: AppColors.primary,
+            minHeight: 6,
+          ),
+        ),
+        const SizedBox(height: 6),
+        Text(
+          '${(plan.progressPercent * 100).toStringAsFixed(0)}%',
+          style: AppTypography.caption.copyWith(
+              fontWeight: FontWeight.w600, color: AppColors.primary),
+        ),
+      ],
+    );
+  }
+}
+
+/// 空计划占位 — 点击跳转挑战页
+class _EmptyPlanContent extends ConsumerWidget {
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    return GestureDetector(
+      onTap: () => ref.read(bottomTabIndexProvider.notifier).state = 1,
+      child: Container(
+        width: double.infinity,
+        padding: const EdgeInsets.symmetric(vertical: 32),
+        decoration: BoxDecoration(
+          color: AppColors.primaryUltraLight,
+          borderRadius: BorderRadius.circular(12),
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+            children: [
+              Container(
+                width: 56,
+                height: 56,
+                decoration: BoxDecoration(
+                  color: AppColors.primary,
+                  borderRadius: BorderRadius.circular(16),
+                ),
+                child: const Icon(Icons.add_rounded, size: 28, color: Colors.white),
+              ),
+              const SizedBox(height: 14),
+              Text('还没有存钱计划',
+                  style: AppTypography.body.copyWith(color: AppColors.primary, fontWeight: FontWeight.w600)),
+              const SizedBox(height: 6),
+              Text('点击这里选择一个存钱方法开始吧',
+                  style: AppTypography.caption),
+            ],
+          ),
+        ),
+    );
+  }
+}
+import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../providers/saving_provider.dart';
+import 'home_screen.dart';
+import 'challenge_screen.dart';
+import 'profile_screen.dart';
+
+/// 底部导航壳
+class MainShell extends ConsumerWidget {
+  const MainShell({super.key});
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final currentIndex = ref.watch(bottomTabIndexProvider);
+
+    final screens = const [
+      HomeScreen(),
+      ChallengeScreen(),
+      ProfileScreen(),
+    ];
+
+    return Scaffold(
+      body: IndexedStack(index: currentIndex, children: screens),
+      bottomNavigationBar: BottomNavigationBar(
+        currentIndex: currentIndex,
+        onTap: (i) => ref.read(bottomTabIndexProvider.notifier).state = i,
+        items: const [
+          BottomNavigationBarItem(
+            icon: Icon(Icons.home_rounded),
+            activeIcon: Icon(Icons.home_filled),
+            label: '首页',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.flag_rounded),
+            activeIcon: Icon(Icons.flag),
+            label: '挑战',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.person_outline_rounded),
+            activeIcon: Icon(Icons.person_rounded),
+            label: '我的',
+          ),
+        ],
+      ),
+    );
+  }
+}
+import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../theme/colors.dart';
+import '../theme/typography.dart';
+import '../models/saving_method.dart';
+import '../utils/saving_calculator.dart';
+import '../providers/saving_provider.dart';
+import 'challenge_detail_screen.dart';
+
+final customTargetProvider = StateProvider<String>((ref) => '');
+
+class MethodSetupScreen extends ConsumerWidget {
+  final SavingMethod method;
+  const MethodSetupScreen({super.key, required this.method});
+
+  IconData get _icon {
+    switch (method.icon) {
+      case 'calendar': return Icons.calendar_month_rounded;
+      case 'trending_up': return Icons.trending_up_rounded;
+      case 'arrow_downward': return Icons.arrow_downward_rounded;
+      case 'pie_chart': return Icons.pie_chart_rounded;
+      case 'grid_view': return Icons.grid_view_rounded;
+      case 'account_balance': return Icons.account_balance_rounded;
+      default: return Icons.savings_rounded;
+    }
+  }
+
+  List<String> _features() {
+    switch (method.id) {
+      case '365_days': return ['越往后存越多，适合收入增长期', '等差数列求和，轻松计算', '可自由选择每天存的数字', '打卡日历直观显示每天进度'];
+      case '52_weeks': return ['每周存一次，频率适中', '初始额度低，轻松开始', '可以倒序，先苦后甜', '全年可存一笔不小的金额'];
+      case 'month_countdown': return ['月初多月末少，越存越轻松', '每月额度递减无压力', '非常适合学生党', '门槛最低的存钱法'];
+      case '333_rule': return ['简单好记：收入分三份', '储蓄率约33%，科学合理', '先储蓄再消费的理念', '可根据实际情况调整比例'];
+      case '6_jars': return ['六个账户全面管理财务', '生活+自由+教育+储蓄+玩乐+社交', '全面规划每笔收入', '源自经典理财书籍'];
+      case '12_cd': return ['每月存一笔一年定期', '次年每月都有存单到期', '兼顾高收益和灵活性', '适合有稳定收入的人'];
+      case '10_percent': return ['最简单有效的存钱法', '先存10%，剩下的随便花', '无痛养成储蓄习惯', '适合所有人群'];
+      case 'round_up': return ['消费向上取整，差额自动存', '花69存1元，花480存20元', '不知不觉攒下一笔钱', '适合经常小额消费的人'];
+      case 'dream_jar': return ['为一个具体梦想而存钱', '设定目标和截止日期', '每天为梦想存一点点', '梦想成真的仪式感'];
+      case 'pretend_save': return ['设定虚拟剧情来攒钱', '养娃养宠穿越任你选', '沉浸式存钱小游戏', '小红书超2600万次浏览'];
+      case 'bet_save': return ['和朋友约定对赌存钱', '没完成就要请客吃饭', '外部压力等于最强动力', '适合需要监督的人'];
+      case 'weekday_cycle': return ['周一存10元到周日存70元', '每周循环轻松无压力', '全年可存一笔不小的钱', '适合喜欢规律节奏的你'];
+      case '1234_rule': return ['收入分四份精打细算', '消费10%+保障20%', '投资30%+长期储蓄40%', '适合想系统规划财务的人'];
+      default: return ['坚持就是胜利'];
+    }
+  }
+
+  void _createPlan(BuildContext context, WidgetRef ref, double annualTotal) async {
+    final customText = ref.read(customTargetProvider);
+    final customAmount = double.tryParse(customText);
+    final target = (customAmount != null && customAmount > 0)
+        ? customAmount : (annualTotal > 0 ? annualTotal : 10000.0);
+    var plan = UserPlan(
+      methodId: method.id, methodName: method.name,
+      startDate: DateTime.now(), targetAmount: target,
+    );
+    plan = await createPlan(plan);
+    ref.read(activePlanProvider.notifier).state = plan;
+    if (context.mounted) {
+      Navigator.pushReplacement(context,
+        MaterialPageRoute(builder: (_) => ChallengeDetailScreen(plan: plan)));
+    }
+  }
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final income = ref.watch(monthlyIncomeProvider);
+    final has = income > 0;
+    final annual = has ? SavingCalculator.calculateAnnualTotal(method.id, monthlyIncome: income) : 0.0;
+    final monthly = has ? SavingCalculator.calculateMonthlyTotal(method.id, monthlyIncome: income) : 0.0;
+    final daily = has ? SavingCalculator.calculateDailyAverage(method.id, monthlyIncome: income) : 0.0;
+    final first = has ? SavingCalculator.getAmountForPeriod(method.id, 0, monthlyIncome: income) : 0.0;
+    final isMonthly = method.ruleType == 'monthly';
+    final is333 = method.id == '333_rule';
+
+    return Scaffold(
+      appBar: AppBar(title: Text(method.name)),
+      body: SafeArea(
+        child: SingleChildScrollView(
+        padding: const EdgeInsets.all(14),
+        child: Column(children: [
+          Card(child: Padding(padding: const EdgeInsets.all(20), child: Column(children: [
+            Container(width: 64, height: 64,
+              decoration: BoxDecoration(color: AppColors.primaryUltraLight, borderRadius: BorderRadius.circular(16)),
+              child: Icon(_icon, color: AppColors.primary, size: 32)),
+            const SizedBox(height: 12), Text(method.name, style: AppTypography.h2),
+            const SizedBox(height: 6),
+            Text(method.description, style: AppTypography.body.copyWith(color: AppColors.textLight), textAlign: TextAlign.center),
+          ]))),
+          const SizedBox(height: 10),
+          Card(child: Padding(padding: const EdgeInsets.all(16), child: Column(children: [
+            const Text('预计数据', style: AppTypography.h3), const SizedBox(height: 12),
+            Row(children: [
+              _S(label: '节奏', val: SavingCalculator.getPeriodType(method.id)),
+              _S(label: isMonthly ? '月存' : '日均', val: has ? (isMonthly ? (is333 ? monthly.toStringAsFixed(2) : '${monthly.round()}') : daily.toStringAsFixed(0)) : '--'),
+              _S(label: '年存', val: has ? (is333 ? annual.toStringAsFixed(2) : '${annual.round()}') : '--'),
+            ]),
+            const SizedBox(height: 10),
+            Container(width: double.infinity, padding: const EdgeInsets.all(14),
+              decoration: BoxDecoration(color: AppColors.primaryUltraLight, borderRadius: BorderRadius.circular(10)),
+              child: Column(children: [
+                const Text('首次存入', style: AppTypography.caption),
+                Text(has ? (is333 ? first.toStringAsFixed(2) : first.toStringAsFixed(0)) : '--',
+                    style: AppTypography.amount.copyWith(color: AppColors.primary, fontSize: 24)),
+              ])),
+          ]))),
+          const SizedBox(height: 10),
+          Card(child: Padding(padding: const EdgeInsets.all(16),
+            child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+              const Text('自定义目标', style: AppTypography.h3), const SizedBox(height: 8),
+              TextField(
+                keyboardType: TextInputType.number,
+                style: AppTypography.h2.copyWith(color: AppColors.primary),
+                decoration: InputDecoration(
+                  prefixText: '¥ ', hintText: annual > 0 ? '默认${annual.round()}' : '输入目标金额',
+                  filled: true, fillColor: AppColors.backgroundGrey,
+                  border: OutlineInputBorder(borderRadius: BorderRadius.circular(10), borderSide: BorderSide.none),
+                ),
+                onChanged: (v) => ref.read(customTargetProvider.notifier).state = v,
+              ),
+            ]))),
+          const SizedBox(height: 10),
+          Card(child: Padding(padding: const EdgeInsets.all(16),
+            child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+              const Text('方法特点', style: AppTypography.h3), const SizedBox(height: 8),
+              ..._features().map((f) => Padding(padding: const EdgeInsets.only(bottom: 6), child: Row(children: [
+                const Icon(Icons.check_circle_rounded, size: 16, color: AppColors.primary),
+                const SizedBox(width: 6), Expanded(child: Text(f, style: AppTypography.body)),
+              ]))),
+            ]))),
+          const SizedBox(height: 80),
+        ]),
+      ),
+      ),
+      bottomNavigationBar: Container(
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(color: AppColors.cardWhite,
+          boxShadow: [BoxShadow(color: Colors.black.withAlpha(10), blurRadius: 8, offset: const Offset(0, -2))]),
+        child: SafeArea(child: ElevatedButton(
+          onPressed: () => _createPlan(context, ref, annual),
+          style: ElevatedButton.styleFrom(backgroundColor: AppColors.primary, foregroundColor: Colors.white,
+            padding: const EdgeInsets.symmetric(vertical: 14),
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12))),
+          child: const Text('开始存钱计划', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700)),
+        )),
+      ),
+    );
+  }
+}
+
+class _S extends StatelessWidget {
+  final String label, val;
+  const _S({required this.label, required this.val});
+  @override
+  Widget build(BuildContext context) => Expanded(child: Column(children: [
+    Text(val, style: AppTypography.h3.copyWith(color: AppColors.primary)),
+    const SizedBox(height: 2), Text(label, style: AppTypography.caption),
+  ]));
+}
+import 'dart:io';
+import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:image_picker/image_picker.dart';
+
+import '../theme/colors.dart';
+import '../theme/typography.dart';
+import '../models/saving_method.dart';
+import '../providers/saving_provider.dart';
+
+/// 头像路径 provider
+final avatarPathProvider = StateProvider<String?>((ref) => null);
+
+class ProfileScreen extends ConsumerWidget {
+  const ProfileScreen({super.key});
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    ref.watch(loadFromDatabase);
+    final activePlan = ref.watch(activePlanProvider);
+    final records = ref.watch(checkInRecordsProvider);
+    final userName = ref.watch(userNameProvider);
+    final avatarPath = ref.watch(avatarPathProvider);
+    final allSavings = records.fold(0.0, (s, r) => s + r.amount);
+    final today = DateTime.now();
+    final checkedDays = records.length;
+    final currentStreak = _streak(records, today);
+    final badges = _badges(records, activePlan, currentStreak, allSavings);
+    final earnedCount = badges.where((b) => b.earned).length;
+
+    return Scaffold(
+      appBar: AppBar(title: const Text('我的')),
+      body: SafeArea(
+        child: SingleChildScrollView(
+        padding: const EdgeInsets.all(16),
+        child: Column(children: [
+          // ── 头像 + 昵称 ──
+          GestureDetector(
+            onTap: () => _pickAvatar(context, ref),
+            child: CircleAvatar(
+              radius: 40,
+              backgroundColor: AppColors.primaryUltraLight,
+              backgroundImage: avatarPath != null ? FileImage(File(avatarPath)) : null,
+              child: avatarPath == null
+                  ? Text(userName.isNotEmpty ? userName[0] : '我',
+                      style: const TextStyle(fontSize: 32, color: AppColors.primary))
+                  : null,
+            ),
+          ),
+          const SizedBox(height: 8),
+          GestureDetector(
+            onTap: () => _editName(context, ref),
+            child: Row(mainAxisAlignment: MainAxisAlignment.center, children: [
+              Text(userName, style: AppTypography.h3),
+              const SizedBox(width: 4),
+              const Icon(Icons.edit, size: 14, color: AppColors.textLight),
+            ]),
+          ),
+          if (activePlan != null)
+            Text('${activePlan.methodName} · 打卡$checkedDays次',
+                style: AppTypography.caption),
+
+          const SizedBox(height: 16),
+
+          // ── 统计 4 格 ──
+          Row(children: [
+            _StatCard(icon: Icons.savings_rounded, color: AppColors.primary, value: '¥${allSavings.round()}', label: '已存'),
+            _StatCard(icon: Icons.calendar_today_rounded, color: AppColors.accent, value: '$checkedDays天', label: '打卡'),
+            _StatCard(icon: Icons.local_fire_department_rounded, color: const Color(0xFFFF8C42), value: '$currentStreak天', label: '连续'),
+            _StatCard(icon: Icons.emoji_events_rounded, color: AppColors.accent, value: '$earnedCount个', label: '徽章'),
+          ]),
+
+          const SizedBox(height: 16),
+
+          // ── 记录 ──
+          Card(
+            margin: EdgeInsets.zero,
+            child: Padding(
+              padding: const EdgeInsets.all(14),
+              child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                Text('📝 最近记录', style: AppTypography.h3),
+                const SizedBox(height: 8),
+                if (records.isEmpty)
+                  const Padding(
+                    padding: EdgeInsets.symmetric(vertical: 8),
+                    child: Center(child: Text('还没有打卡记录', style: AppTypography.caption)),
+                  )
+                else
+                  ...records.take(5).map((r) => Padding(
+                        padding: const EdgeInsets.only(bottom: 6),
+                        child: Row(children: [
+                          const Icon(Icons.check_circle_rounded, size: 14, color: AppColors.primary),
+                          const SizedBox(width: 6),
+                          Text('${r.date.month}/${r.date.day}', style: AppTypography.body),
+                          const Spacer(),
+                          Text('+¥${r.amount.round()}',
+                              style: AppTypography.body.copyWith(fontWeight: FontWeight.w600, color: AppColors.primary)),
+                        ]),
+                      )),
+              ]),
+            ),
+          ),
+
+          const SizedBox(height: 12),
+
+          // ── 成就徽章（可折叠） ──
+          _CollapsibleBadges(badges: badges),
+
+        ]),
+      ),
+      ),
+    );
+  }
+
+  void _pickAvatar(BuildContext context, WidgetRef ref) async {
+    final picker = ImagePicker();
+    final file = await picker.pickImage(source: ImageSource.gallery, maxWidth: 400);
+    if (file != null) {
+      ref.read(avatarPathProvider.notifier).state = file.path;
+    }
+  }
+
+  void _editName(BuildContext context, WidgetRef ref) {
+    final ctrl = TextEditingController(text: ref.read(userNameProvider));
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        title: const Text('✏️ 修改昵称'),
+        content: TextField(
+          controller: ctrl, autofocus: true, maxLength: 12,
+          decoration: InputDecoration(
+            hintText: '输入你的昵称', filled: true, fillColor: AppColors.backgroundGrey,
+            border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide.none),
+          ),
+        ),
+        actions: [
+          TextButton(onPressed: () => Navigator.pop(ctx), child: const Text('取消')),
+          ElevatedButton(
+            onPressed: () {
+              final n = ctrl.text.trim();
+              if (n.isNotEmpty) ref.read(userNameProvider.notifier).state = n;
+              Navigator.pop(ctx);
+            },
+            style: ElevatedButton.styleFrom(backgroundColor: AppColors.primary, foregroundColor: Colors.white,
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12))),
+            child: const Text('保存'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  int _streak(List<SavingRecord> records, DateTime today) {
+    if (records.isEmpty) return 0;
+    final dates = records.map((r) => r.date).toSet().toList()..sort((a, b) => b.compareTo(a));
+    int s = 0;
+    var d = today;
+    for (final date in dates) {
+      if (date.year == d.year && date.month == d.month && date.day == d.day) {
+        s++;
+        d = d.subtract(const Duration(days: 1));
+      } else if (date.isBefore(d)) {
+        break;
+      }
+    }
+    return s;
+  }
+
+  List<_Badge> _badges(List<SavingRecord> records, UserPlan? plan, int streak, double total) {
+    final totalCount = records.length;
+    final weekTotal = records.where((r) => r.date.isAfter(DateTime.now().subtract(const Duration(days: 7)))).fold(0.0, (s, r) => s + r.amount);
+    return [
+      // 入门
+      _Badge('🪙', '初次打卡', totalCount >= 1),
+      _Badge('🎯', '首个计划', plan != null),
+      _Badge('📅', '打卡3天', totalCount >= 3),
+      _Badge('🚀', '首周坚持', streak >= 7),
+      // 连续
+      _Badge('🔥', '连续7天', streak >= 7),
+      _Badge('⚡', '连续14天', streak >= 14),
+      _Badge('💪', '连续21天', streak >= 21),
+      _Badge('🌟', '连续30天', streak >= 30),
+      _Badge('🏅', '连续60天', streak >= 60),
+      _Badge('💎', '连续100天', streak >= 100),
+      // 金额里程碑
+      _Badge('🥉', '百元户', total >= 100),
+      _Badge('🥈', '五百元户', total >= 500),
+      _Badge('💰', '千元户', total >= 1000),
+      _Badge('💵', '五千元户', total >= 5000),
+      _Badge('💎', '万元户', total >= 10000),
+      _Badge('🏦', '三万元户', total >= 30000),
+      _Badge('👑', '五万元户', total >= 50000),
+      _Badge('🏆', '十万元户', total >= 100000),
+      // 打卡次数
+      _Badge('📝', '打卡10次', totalCount >= 10),
+      _Badge('📋', '打卡30次', totalCount >= 30),
+      _Badge('📚', '打卡50次', totalCount >= 50),
+      _Badge('📖', '打卡100次', totalCount >= 100),
+      _Badge('🗂️', '打卡365次', totalCount >= 365),
+      // 行为特征
+      _Badge('🌙', '夜猫子', records.where((r) => r.date.hour >= 22 || r.date.hour < 6).length >= 5),
+      _Badge('🌅', '早鸟', records.where((r) => r.date.hour >= 5 && r.date.hour < 8).length >= 5),
+      _Badge('🌧️', '风雨无阻', records.where((r) => r.date.weekday == 6 || r.date.weekday == 7).length >= 10),
+      _Badge('🎯', '完美一月', _countDaysInMonth(records, DateTime.now()) == DateTime(DateTime.now().year, DateTime.now().month + 1, 0).day),
+      _Badge('📈', '本周最多', weekTotal >= 500),
+      _Badge('💸', '单日最高', records.isNotEmpty && records.map((r) => r.amount).reduce((a, b) => a > b ? a : b) >= 200),
+      // 挑战
+      _Badge('🏁', '挑战完成', plan != null && plan.progressPercent >= 1.0),
+      _Badge('🎪', '同时进行中', plan != null && plan.status == 'active'),
+      _Badge('🔄', '多次挑战', plan != null && totalCount >= 60),
+      _Badge('🥇', '全勤王者', streak >= 90),
+      _Badge('🐉', '存钱传说', total >= 50000 && streak >= 60),
+      _Badge('👼', '新年决心', _isJanStreak(records, streak)),
+    ];
+  }
+
+  int _countDaysInMonth(List<SavingRecord> records, DateTime now) {
+    return records.where((r) => r.date.year == now.year && r.date.month == now.month)
+        .map((r) => r.date.day).toSet().length;
+  }
+
+  bool _isJanStreak(List<SavingRecord> records, int streak) {
+    final now = DateTime.now();
+    return now.month == 1 && streak >= 7;
+  }
+
+}
+
+/// 统计小格
+class _StatCard extends StatelessWidget {
+  final IconData icon;
+  final Color color;
+  final String value;
+  final String label;
+  const _StatCard({required this.icon, required this.color, required this.value, required this.label});
+
+  @override
+  Widget build(BuildContext context) {
+    return Expanded(
+      child: Card(
+        margin: const EdgeInsets.all(3),
+        child: Padding(
+          padding: const EdgeInsets.symmetric(vertical: 12),
+          child: Column(children: [
+            Icon(icon, color: color, size: 20),
+            const SizedBox(height: 4),
+            Text(value, style: const TextStyle(fontSize: 15, fontWeight: FontWeight.bold, color: AppColors.textDark)),
+            Text(label, style: AppTypography.caption),
+          ]),
+        ),
+      ),
+    );
+  }
+}
+
+/// 可折叠徽章卡片
+class _CollapsibleBadges extends StatefulWidget {
+  final List<_Badge> badges;
+  const _CollapsibleBadges({required this.badges});
+  @override
+  State<_CollapsibleBadges> createState() => _CollapsibleBadgesState();
+}
+
+class _CollapsibleBadgesState extends State<_CollapsibleBadges> {
+  bool _open = false;
+
+  @override
+  Widget build(BuildContext context) {
+    final earnedCount = widget.badges.where((b) => b.earned).length;
+    return Card(
+      margin: EdgeInsets.zero,
+      child: Column(children: [
+        InkWell(
+          borderRadius: BorderRadius.circular(16),
+          onTap: () => setState(() => _open = !_open),
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+            child: Row(children: [
+              const Text('🏅 成就徽章', style: AppTypography.h3),
+              const SizedBox(width: 8),
+              Text('$earnedCount/${widget.badges.length}',
+                  style: AppTypography.caption.copyWith(color: AppColors.primary)),
+              const Spacer(),
+              Icon(_open ? Icons.expand_less : Icons.expand_more, color: AppColors.textLight),
+            ]),
+          ),
+        ),
+        if (_open)
+          Padding(
+            padding: const EdgeInsets.fromLTRB(14, 0, 14, 14),
+            child: Wrap(spacing: 12, runSpacing: 10, children: widget.badges.map((b) {
+              return Column(children: [
+                Container(
+                  width: 42, height: 42,
+                  decoration: BoxDecoration(
+                    color: b.earned ? AppColors.primaryUltraLight : AppColors.backgroundGrey,
+                    borderRadius: BorderRadius.circular(10),
+                    border: b.earned ? Border.all(color: AppColors.primary, width: 1.5) : null,
+                  ),
+                  child: Center(child: Text(b.emoji, style: const TextStyle(fontSize: 20))),
+                ),
+                const SizedBox(height: 4),
+                Text(b.label, style: TextStyle(fontSize: 10, color: b.earned ? AppColors.textDark : AppColors.textLight)),
+              ]);
+            }).toList()),
+          ),
+      ]),
+    );
+  }
+}
+
+class _Badge {
+  final String emoji;
+  final String label;
+  final bool earned;
+  const _Badge(this.emoji, this.label, this.earned);
+}
+import 'package:flutter/material.dart';
+
+/// 罐罐 App — 薄荷青柠马卡龙色板
+class AppColors {
+  AppColors._();
+
+  // 主色 — 薄荷绿
+  static const Color primary = Color(0xFF7DCFB6);
+  static const Color primaryLight = Color(0xFFA8E6CF);
+  static const Color primaryUltraLight = Color(0xFFD6F5E8);
+
+  // 辅色 — 杏色暖调点缀（金币、奖章）
+  static const Color accent = Color(0xFFFFE8B3);
+
+  // 中性色
+  static const Color cardWhite = Color(0xFFFFFFFF);
+  static const Color backgroundGrey = Color(0xFFF5F5F5);
+
+  // 文字色
+  static const Color textDark = Color(0xFF2C3E50);
+  static const Color textLight = Color(0xFF95A5A6);
+
+  // 功能色
+  static const Color success = Color(0xFF7DCFB6);
+  static const Color warning = Color(0xFFFFD93D);
+  static const Color error = Color(0xFFFF6B6B);
+
+  // 难度色
+  static const Color difficultyEasy = Color(0xFFA8E6CF);
+  static const Color difficultyMedium = Color(0xFFFFE8B3);
+  static const Color difficultyHard = Color(0xFFFFB3B3);
+
+  // Material 主题色 swatch
+  static const MaterialColor primarySwatch = MaterialColor(0xFF7DCFB6, {
+    50: Color(0xFFD6F5E8),
+    100: Color(0xFFA8E6CF),
+    200: Color(0xFF7DCFB6),
+    300: Color(0xFF5CBF9E),
+    400: Color(0xFF3EAF88),
+    500: Color(0xFF7DCFB6),
+    600: Color(0xFF6BBFA3),
+    700: Color(0xFF5AAD90),
+    800: Color(0xFF489B7D),
+    900: Color(0xFF367A6A),
+  });
+}
+import 'package:flutter/material.dart';
+import 'colors.dart';
+
+/// 罐罐 App — 字体层级
+class AppTypography {
+  AppTypography._();
+
+  // 使用系统默认字体（Roboto / SF Pro）
+
+  static const TextStyle h1 = TextStyle(
+    fontSize: 32,
+    fontWeight: FontWeight.bold,
+    color: AppColors.textDark,
+    height: 1.2,
+  );
+
+  static const TextStyle h2 = TextStyle(
+    fontSize: 20,
+    fontWeight: FontWeight.bold,
+    color: AppColors.textDark,
+    height: 1.3,
+  );
+
+  static const TextStyle h3 = TextStyle(
+    fontSize: 16,
+    fontWeight: FontWeight.w600,
+    color: AppColors.textDark,
+    height: 1.4,
+  );
+
+  static const TextStyle body = TextStyle(
+    fontSize: 14,
+    fontWeight: FontWeight.normal,
+    color: AppColors.textDark,
+    height: 1.5,
+  );
+
+  static const TextStyle caption = TextStyle(
+    fontSize: 12,
+    fontWeight: FontWeight.normal,
+    color: AppColors.textLight,
+    height: 1.4,
+  );
+
+  /// 金额大字 — 用于总资产展示
+  static const TextStyle amount = TextStyle(
+    fontSize: 36,
+    fontWeight: FontWeight.bold,
+    color: AppColors.textDark,
+    height: 1.2,
+    letterSpacing: -0.5,
+  );
+
+  /// Material 3 TextTheme
+  static TextTheme get textTheme => const TextTheme(
+        displayLarge: h1,
+        headlineMedium: h2,
+        titleLarge: h3,
+        bodyLarge: body,
+        bodyMedium: caption,
+      );
+}
+import 'package:sqflite/sqflite.dart';
+import 'package:path/path.dart';
+import '../models/saving_method.dart';
+
+/// SQLite 数据库管理单例
+class DatabaseHelper {
+  static DatabaseHelper? _instance;
+  static Database? _database;
+
+  DatabaseHelper._();
+
+  static DatabaseHelper get instance => _instance ??= DatabaseHelper._();
+
+  Future<Database> get database async {
+    _database ??= await _initDatabase();
+    return _database!;
+  }
+
+  Future<Database> _initDatabase() async {
+    final dbPath = await getDatabasesPath();
+    final path = join(dbPath, 'jar_jar.db');
+
+    return openDatabase(
+      path,
+      version: 1,
+      onCreate: _onCreate,
+    );
+  }
+
+  Future<void> _onCreate(Database db, int version) async {
+    await db.execute('''
+      CREATE TABLE plans (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        method_id TEXT NOT NULL,
+        method_name TEXT NOT NULL,
+        start_date TEXT NOT NULL,
+        target_amount REAL NOT NULL,
+        saved_amount REAL DEFAULT 0,
+        status TEXT DEFAULT 'active',
+        created_at TEXT DEFAULT CURRENT_TIMESTAMP
+      )
+    ''');
+
+    await db.execute('''
+      CREATE TABLE records (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        plan_id INTEGER NOT NULL,
+        date TEXT NOT NULL,
+        amount REAL NOT NULL,
+        is_completed INTEGER DEFAULT 0,
+        FOREIGN KEY (plan_id) REFERENCES plans(id) ON DELETE CASCADE
+      )
+    ''');
+
+    await db.execute('''
+      CREATE TABLE badges (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        name TEXT NOT NULL,
+        description TEXT,
+        icon TEXT,
+        earned_date TEXT,
+        plan_id INTEGER
+      )
+    ''');
+  }
+
+  // ========== Plan CRUD ==========
+
+  Future<int> insertPlan(UserPlan plan) async {
+    final db = await database;
+    return db.insert('plans', {
+      'method_id': plan.methodId,
+      'method_name': plan.methodName,
+      'start_date': plan.startDate.toIso8601String().split('T')[0],
+      'target_amount': plan.targetAmount,
+      'saved_amount': plan.savedAmount,
+      'status': plan.status,
+      'created_at': DateTime.now().toIso8601String(),
+    });
+  }
+
+  Future<UserPlan?> getActivePlan() async {
+    final db = await database;
+    final results = await db.query(
+      'plans',
+      where: 'status = ?',
+      whereArgs: ['active'],
+      orderBy: 'created_at DESC',
+      limit: 1,
+    );
+    if (results.isEmpty) return null;
+    return _mapPlan(results.first);
+  }
+
+  Future<List<UserPlan>> getAllPlans() async {
+    final db = await database;
+    final results = await db.query('plans', orderBy: 'created_at DESC');
+    return results.map(_mapPlan).toList();
+  }
+
+  Future<int> updatePlan(UserPlan plan) async {
+    final db = await database;
+    return db.update(
+      'plans',
+      {
+        'saved_amount': plan.savedAmount,
+        'status': plan.status,
+      },
+      where: 'id = ?',
+      whereArgs: [plan.id],
+    );
+  }
+
+  Future<int> deletePlan(int id) async {
+    final db = await database;
+    await db.delete('records', where: 'plan_id = ?', whereArgs: [id]);
+    return db.delete('plans', where: 'id = ?', whereArgs: [id]);
+  }
+
+  // ========== Record CRUD ==========
+
+  Future<int> insertRecord(SavingRecord record) async {
+    final db = await database;
+    return db.insert('records', {
+      'plan_id': record.planId,
+      'date': record.date.toIso8601String().split('T')[0],
+      'amount': record.amount,
+      'is_completed': record.isCompleted ? 1 : 0,
+    });
+  }
+
+  Future<List<SavingRecord>> getRecordsByPlan(int planId) async {
+    final db = await database;
+    final results = await db.query(
+      'records',
+      where: 'plan_id = ?',
+      whereArgs: [planId],
+      orderBy: 'date DESC',
+    );
+    return results.map(_mapRecord).toList();
+  }
+
+  Future<bool> hasTodayRecord(int planId) async {
+    final db = await database;
+    final today = DateTime.now().toIso8601String().split('T')[0];
+    final result = await db.query(
+      'records',
+      where: 'plan_id = ? AND date = ?',
+      whereArgs: [planId, today],
+      limit: 1,
+    );
+    return result.isNotEmpty;
+  }
+
+  // ========== Badge CRUD ==========
+
+  Future<int> insertBadge({
+    required String name,
+    String? description,
+    String? icon,
+    int? planId,
+  }) async {
+    final db = await database;
+    return db.insert('badges', {
+      'name': name,
+      'description': description,
+      'icon': icon,
+      'earned_date': DateTime.now().toIso8601String(),
+      'plan_id': planId,
+    });
+  }
+
+  Future<List<Map<String, dynamic>>> getBadges() async {
+    final db = await database;
+    return db.query('badges', orderBy: 'earned_date DESC');
+  }
+
+  // ========== Mappers ==========
+
+  UserPlan _mapPlan(Map<String, dynamic> row) {
+    return UserPlan(
+      id: row['id'] as int,
+      methodId: row['method_id'] as String,
+      methodName: row['method_name'] as String,
+      startDate: DateTime.parse(row['start_date'] as String),
+      targetAmount: (row['target_amount'] as num).toDouble(),
+      savedAmount: (row['saved_amount'] as num?)?.toDouble() ?? 0,
+      status: row['status'] as String? ?? 'active',
+    );
+  }
+
+  SavingRecord _mapRecord(Map<String, dynamic> row) {
+    return SavingRecord(
+      id: row['id'] as int,
+      planId: row['plan_id'] as int,
+      date: DateTime.parse(row['date'] as String),
+      amount: (row['amount'] as num).toDouble(),
+      isCompleted: (row['is_completed'] as int?) == 1,
+    );
+  }
+}
+import 'package:flutter_local_notifications/flutter_local_notifications.dart';
+import 'package:timezone/timezone.dart' as tz;
+
+/// 本地通知管理
+class NotificationHelper {
+  static final _notifications = FlutterLocalNotificationsPlugin();
+
+  static Future<void> init() async {
+    const androidSettings =
+        AndroidInitializationSettings('@mipmap/ic_launcher');
+    const iosSettings = DarwinInitializationSettings(
+      requestAlertPermission: true,
+      requestBadgePermission: true,
+      requestSoundPermission: true,
+    );
+    const settings = InitializationSettings(
+      android: androidSettings,
+      iOS: iosSettings,
+    );
+    await _notifications.initialize(settings);
+  }
+
+  /// 设置每日提醒
+  static Future<void> scheduleDailyReminder({
+    int hour = 20,
+    int minute = 0,
+    String title = '🫙 罐罐提醒你存钱啦',
+    String body = '今天的存钱打卡还没完成，坚持就是胜利！',
+  }) async {
+    await _notifications.cancelAll();
+
+    const androidDetails = AndroidNotificationDetails(
+      'daily_reminder',
+      '每日存钱提醒',
+      channelDescription: '罐罐每日存钱打卡提醒',
+      importance: Importance.defaultImportance,
+      priority: Priority.defaultPriority,
+    );
+    const details = NotificationDetails(
+      android: androidDetails,
+      iOS: DarwinNotificationDetails(),
+    );
+
+    await _notifications.zonedSchedule(
+      0,
+      title,
+      body,
+      _nextTime(hour, minute),
+      details,
+      androidScheduleMode: AndroidScheduleMode.inexactAllowWhileIdle,
+      matchDateTimeComponents: DateTimeComponents.time,
+      uiLocalNotificationDateInterpretation:
+          UILocalNotificationDateInterpretation.absoluteTime,
+    );
+  }
+
+  static tz.TZDateTime _nextTime(int hour, int minute) {
+    final now = tz.TZDateTime.now(tz.local);
+    var scheduled = tz.TZDateTime(tz.local, now.year, now.month, now.day, hour, minute);
+    if (scheduled.isBefore(now)) {
+      scheduled = scheduled.add(const Duration(days: 1));
+    }
+    return scheduled;
+  }
+
+  static Future<void> cancelAll() async {
+    await _notifications.cancelAll();
+  }
+}
+/// 存钱计算引擎 — 每种方法用真实公式
+class SavingCalculator {
+  SavingCalculator._();
+
+  /// 当月天数
+  static int currentMonthDays() {
+    final now = DateTime.now();
+    return DateTime(now.year, now.month + 1, 0).day;
+  }
+
+  /// 某周期的应存金额（按方法真实公式）
+  /// periodIndex: 0-based (第1天=0, 第1周=0, 第1月=0)
+  static double getAmountForPeriod(String methodId, int periodIndex,
+      {double monthlyIncome = 5000}) {
+    switch (methodId) {
+      // ── 递增型 ──
+      case '365_days':
+        // 第N天存N元 (N = periodIndex+1)
+        return (periodIndex + 1).toDouble();
+
+      case '52_weeks':
+        // 第N周存N×10元
+        return (periodIndex + 1) * 10.0;
+
+      // ── 倒数型 ──
+      case 'month_countdown':
+        // 每月1号=当月天数, 2号=当月天数-1, ... 最后一天=1
+        final days = currentMonthDays();
+        return (days - periodIndex).clamp(1, days).toDouble();
+
+      // ── 星期循环型 ──
+      case 'weekday_cycle':
+        // 周一10→周二20→...→周日70（periodIndex mod 7）
+        return ((periodIndex % 7) + 1) * 10.0;
+
+      // ── 收入比例型（每月固定） ──
+      case '333_rule':
+        return monthlyIncome / 3;
+
+      case '10_percent':
+        return monthlyIncome * 0.10;
+
+      case '1234_rule':
+        // 储蓄40% + 投资30% = 70%
+        return monthlyIncome * 0.70;
+
+      case '12_cd':
+        return monthlyIncome * 0.30;
+
+      case '6_jars':
+        return monthlyIncome * 0.20;
+
+      // ── 小额趣味型 ──
+      case 'round_up':
+        return 10.0; // 每次消费取整，日均约10元
+
+      case 'dream_jar':
+        return monthlyIncome * 0.15;
+
+      case 'pretend_save':
+        return 20.0; // 假装消费，日均20元
+
+      case 'bet_save':
+        return monthlyIncome * 0.20;
+
+      default:
+        return monthlyIncome * 0.20;
+    }
+  }
+
+  /// 预计年存总额
+  static double calculateAnnualTotal(String methodId,
+      {double monthlyIncome = 5000}) {
+    switch (methodId) {
+      case '365_days':
+        // 等差数列: (1+365)×365÷2
+        return 66795.0;
+
+      case '52_weeks':
+        // (10+520)×52÷2
+        return 13780.0;
+
+      case 'month_countdown':
+        // 每月(1+30)×30÷2×12/30 ≈ 5580
+        return 5580.0;
+
+      case 'weekday_cycle':
+        // 每周280 × 52
+        return 14560.0;
+
+      case '333_rule':
+        return (monthlyIncome / 3) * 12;
+
+      case '10_percent':
+        return monthlyIncome * 0.10 * 12;
+
+      case '1234_rule':
+        return monthlyIncome * 0.70 * 12;
+
+      case '12_cd':
+        return monthlyIncome * 0.30 * 12;
+
+      case '6_jars':
+        return monthlyIncome * 0.20 * 12;
+
+      case 'round_up':
+        return 3650.0;
+
+      case 'dream_jar':
+        return monthlyIncome * 0.15 * 12;
+
+      case 'pretend_save':
+        return 7300.0;
+
+      case 'bet_save':
+        return monthlyIncome * 0.20 * 12;
+
+      default:
+        return monthlyIncome * 0.20 * 12;
+    }
+  }
+
+  /// 今日存款（快捷方法）
+  static double dailyAmount(String methodId, {double monthlyIncome = 5000}) {
+    return getAmountForPeriod(methodId, 0, monthlyIncome: monthlyIncome);
+  }
+
+  /// 月均存款
+  static double calculateMonthlyTotal(String methodId,
+      {double monthlyIncome = 5000}) {
+    return calculateAnnualTotal(methodId, monthlyIncome: monthlyIncome) / 12;
+  }
+
+  /// 日均存款
+  static double calculateDailyAverage(String methodId,
+      {double monthlyIncome = 5000}) {
+    final daily = getAmountForPeriod(methodId, 0, monthlyIncome: monthlyIncome);
+    // 对于每天变化的方法，返回平均值
+    switch (methodId) {
+      case '365_days':
+        return (1.0 + 365.0) / 2; // 平均每天183
+      case '52_weeks':
+        return (10.0 + 520.0) / 2 / 7; // 平均每天38
+      case 'month_countdown':
+        return (1.0 + 30.0) / 2; // 平均每天15.5
+      case 'weekday_cycle':
+        return (10.0 + 70.0) / 2; // 平均每天40
+      default:
+        return daily;
+    }
+  }
+
+  /// 总周期数
+  static int getTotalPeriods(String methodId) {
+    switch (methodId) {
+      case '52_weeks': return 52;
+      case '333_rule': case '6_jars': case '12_cd':
+      case '10_percent': case '1234_rule': case 'bet_save':
+        return 12;
+      default: return 365;
+    }
+  }
+
+  /// 周期标签
+  static String getPeriodLabel(String methodId, int periodIndex) {
+    if (methodId == '52_weeks') return '第 ${periodIndex + 1} 周';
+    if (methodId == '333_rule' || methodId == '6_jars' || methodId == '12_cd' ||
+        methodId == '10_percent' || methodId == '1234_rule' || methodId == 'bet_save') {
+      return '第 ${periodIndex + 1} 个月';
+    }
+    return '第 ${periodIndex + 1} 天';
+  }
+
+  /// 周期类型
+  static String getPeriodType(String methodId) {
+    if (methodId == '52_weeks') return '每周';
+    if (methodId == '333_rule' || methodId == '6_jars' || methodId == '12_cd' ||
+        methodId == '10_percent' || methodId == '1234_rule' || methodId == 'bet_save') {
+      return '每月';
+    }
+    return '每天';
+  }
+}
+import '../models/saving_method.dart';
+import 'saving_calculator.dart';
+
+/// 智能存钱推荐引擎
+class SavingRecommender {
+  SavingRecommender._();
+
+  /// 根据月收入推荐存钱方案
+  /// [monthlyIncome] 月收入金额
+  /// [preference] 偏好：easy=轻松 / medium=适中 / hard=挑战
+  static List<SavingRecommendation> recommend(
+    double monthlyIncome, {
+    String preference = 'medium',
+  }) {
+    final methods = SavingMethod.defaultMethods;
+    final recommendations = <SavingRecommendation>[];
+
+    for (final method in methods) {
+      double expectedAnnual;
+
+      if (method.id == '365_days' || method.id == '52_weeks') {
+        expectedAnnual = method.estimatedAnnual;
+      } else if (method.id == 'month_countdown') {
+        expectedAnnual = method.estimatedAnnual;
+      } else {
+        expectedAnnual =
+            SavingCalculator.calculateAnnualTotal(method.id,
+                monthlyIncome: monthlyIncome);
+      }
+
+      // 过滤不适合的方案
+      if (!_isSuitable(method.id, monthlyIncome, preference)) continue;
+
+      final reason = _generateReason(
+          method.id, monthlyIncome, expectedAnnual, preference);
+
+      recommendations.add(SavingRecommendation(
+        method: method,
+        expectedAnnual: expectedAnnual,
+        reason: reason,
+      ));
+    }
+
+    // 按预计年存款排序
+    recommendations.sort((a, b) => b.expectedAnnual.compareTo(a.expectedAnnual));
+
+    // 根据偏好过滤
+    return _filterByPreference(recommendations, preference);
+  }
+
+  /// 检查方法是否适合该收入水平
+  static bool _isSuitable(
+      String methodId, double monthlyIncome, String preference) {
+    switch (methodId) {
+      case '365_days':
+        // 年存66795，建议月收入5000+
+        return monthlyIncome >= 3000 || preference == 'hard';
+      case '52_weeks':
+        // 年存13780，适合所有人
+        return true;
+      case 'month_countdown':
+        // 年存5580，适合低预算
+        return true;
+      case '333_rule':
+        // 月收入>0即可
+        return monthlyIncome > 0;
+      case '6_jars':
+        // 需要一定规划能力，月收入3000+
+        return monthlyIncome >= 2000;
+      case '12_cd':
+        // 需要稳定收入
+        return monthlyIncome >= 2500;
+      default:
+        return true;
+    }
+  }
+
+  /// 生成推荐理由
+  static String _generateReason(
+    String methodId,
+    double monthlyIncome,
+    double expectedAnnual,
+    String preference,
+  ) {
+    final savingsRate = monthlyIncome > 0
+        ? ((expectedAnnual / 12) / monthlyIncome * 100).round()
+        : 0;
+
+    switch (methodId) {
+      case '365_days':
+        if (preference == 'hard') {
+          return '挑战型首选！年底攒下¥${expectedAnnual.round()}，成就感爆棚';
+        }
+        return '每天存一点，年底收获¥${expectedAnnual.round()}的惊喜';
+      case '52_weeks':
+        return '轻松起步，一年攒¥${expectedAnnual.round()}，适合存钱入门';
+      case 'month_countdown':
+        return '越存越轻松！每月¥465，一年¥5580，零压力攒钱';
+      case '333_rule':
+        return '每月储蓄$savingsRate%收入，约¥${(monthlyIncome / 3).round()}，简单好坚持';
+      case '6_jars':
+        return '全面规划财务，储蓄+投资约¥${expectedAnnual.round()}/年';
+      case '12_cd':
+        return '强制储蓄$savingsRate%月收入，每月¥${(monthlyIncome * 0.3).round()}，还有利息收益';
+      default:
+        return '推荐尝试';
+    }
+  }
+
+  /// 根据偏好过滤推荐结果
+  static List<SavingRecommendation> _filterByPreference(
+    List<SavingRecommendation> recommendations,
+    String preference,
+  ) {
+    switch (preference) {
+      case 'easy':
+        // 只推荐 easy 难度的
+        return recommendations
+            .where((r) => r.method.difficulty == 'easy')
+            .take(3)
+            .toList();
+      case 'hard':
+        // 包含 hard 难度
+        return recommendations.take(3).toList();
+      case 'medium':
+      default:
+        // 排除 hard，优先 easy 和 medium
+        return recommendations
+            .where((r) => r.method.difficulty != 'hard')
+            .take(3)
+            .toList();
+    }
+  }
+}
+import 'dart:ui';
+import 'package:flutter/material.dart';
+import '../theme/colors.dart';
+
+/// 毛玻璃卡片 — 全局统一质感
+class GlassCard extends StatelessWidget {
+  final Widget child;
+  final EdgeInsetsGeometry? margin;
+  final EdgeInsetsGeometry? padding;
+  final double? borderRadius;
+  final VoidCallback? onTap;
+
+  const GlassCard({
+    super.key,
+    required this.child,
+    this.margin,
+    this.padding = const EdgeInsets.all(16),
+    this.borderRadius = 16,
+    this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final card = ClipRRect(
+      borderRadius: BorderRadius.circular(borderRadius!),
+      child: BackdropFilter(
+        filter: ImageFilter.blur(sigmaX: 8, sigmaY: 8),
+        child: Container(
+          padding: padding,
+          decoration: BoxDecoration(
+            color: AppColors.cardWhite.withAlpha(180),
+            borderRadius: BorderRadius.circular(borderRadius!),
+            border: Border.all(
+              color: Colors.white.withAlpha(120),
+              width: 1,
+            ),
+          ),
+          child: child,
+        ),
+      ),
+    );
+
+    if (onTap != null) {
+      return GestureDetector(
+        onTap: onTap,
+        child: Padding(
+          padding: margin ?? const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+          child: card,
+        ),
+      );
+    }
+
+    return Padding(
+      padding: margin ?? const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+      child: card,
+    );
+  }
+}
+import 'dart:math';
+import 'package:flutter/material.dart';
+import '../theme/colors.dart';
+import '../theme/typography.dart';
+
+/// 环形进度组件
+class ProgressRing extends StatelessWidget {
+  final double progress; // 0.0 ~ 1.0
+  final double size;
+  final double strokeWidth;
+  final Color? progressColor;
+  final Color? backgroundColor;
+  final Widget? centerChild;
+
+  const ProgressRing({
+    super.key,
+    required this.progress,
+    this.size = 140,
+    this.strokeWidth = 10,
+    this.progressColor,
+    this.backgroundColor,
+    this.centerChild,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final bgColor = backgroundColor ?? AppColors.primaryUltraLight;
+    final fgColor = progressColor ?? AppColors.primary;
+
+    return SizedBox(
+      width: size,
+      height: size,
+      child: Stack(
+        alignment: Alignment.center,
+        children: [
+          CustomPaint(
+            size: Size(size, size),
+            painter: _RingPainter(
+              progress: 1.0,
+              color: bgColor,
+              strokeWidth: strokeWidth,
+            ),
+          ),
+          CustomPaint(
+            size: Size(size, size),
+            painter: _RingPainter(
+              progress: progress.clamp(0.0, 1.0),
+              color: fgColor,
+              strokeWidth: strokeWidth,
+            ),
+          ),
+          centerChild ??
+              Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(
+                    '${(progress * 100).round()}%',
+                    style: AppTypography.h2.copyWith(
+                      color: fgColor,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ],
+              ),
+        ],
+      ),
+    );
+  }
+}
+
+class _RingPainter extends CustomPainter {
+  final double progress;
+  final Color color;
+  final double strokeWidth;
+
+  _RingPainter({
+    required this.progress,
+    required this.color,
+    required this.strokeWidth,
+  });
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final center = Offset(size.width / 2, size.height / 2);
+    final radius = (size.width - strokeWidth) / 2;
+
+    final paint = Paint()
+      ..color = color
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = strokeWidth
+      ..strokeCap = StrokeCap.round;
+
+    canvas.drawArc(
+      Rect.fromCircle(center: center, radius: radius),
+      -pi / 2, // 从顶部开始
+      2 * pi * progress,
+      false,
+      paint,
+    );
+  }
+
+  @override
+  bool shouldRepaint(covariant _RingPainter oldDelegate) =>
+      oldDelegate.progress != progress || oldDelegate.color != color;
+}
+import 'dart:io' show Platform;
+import 'package:flutter/cupertino.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:timezone/data/latest.dart' as tz_data;
+import 'package:timezone/timezone.dart' as tz;
+import 'theme/colors.dart';
+import 'theme/typography.dart';
+import 'screens/main_shell.dart';
+import 'utils/database_helper.dart';
+import 'utils/notification_helper.dart';
+
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+
+  // 初始化时区
+  tz_data.initializeTimeZones();
+  try {
+    tz.setLocalLocation(tz.getLocation('Asia/Shanghai'));
+  } catch (_) {}
+
+  // 初始化数据库
+  try {
+    await DatabaseHelper.instance.database;
+  } catch (e) {
+    debugPrint('DB: $e');
+  }
+
+  // 通知后续通过设置页手动开启
+  try {
+    await NotificationHelper.init();
+  } catch (e) {
+    debugPrint('Notify: $e');
+  }
+
+  runApp(const ProviderScope(child: JarJarApp()));
+}
+
+class JarJarApp extends StatelessWidget {
+  const JarJarApp({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return MaterialApp(
+      title: '罐罐',
+      debugShowCheckedModeBanner: false,
+      scrollBehavior: _PlatformScrollBehavior(),
+      theme: ThemeData(
+        colorScheme: ColorScheme.fromSeed(
+          seedColor: AppColors.primary,
+          primary: AppColors.primary,
+          surface: AppColors.cardWhite,
+        ),
+        useMaterial3: true,
+        textTheme: AppTypography.textTheme,
+        scaffoldBackgroundColor: AppColors.backgroundGrey,
+        appBarTheme: AppBarTheme(
+          backgroundColor: AppColors.cardWhite.withAlpha(200),
+          foregroundColor: AppColors.textDark,
+          elevation: 0,
+          centerTitle: true,
+          titleTextStyle: AppTypography.h3,
+          surfaceTintColor: Colors.transparent,
+        ),
+        cardTheme: CardThemeData(
+          color: AppColors.cardWhite.withAlpha(180),
+          elevation: 1,
+          shadowColor: AppColors.primaryLight.withAlpha(40),
+          surfaceTintColor: Colors.transparent,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(16),
+            side: BorderSide(color: Colors.white.withAlpha(80), width: 0.5),
+          ),
+          margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+        ),
+        floatingActionButtonTheme: const FloatingActionButtonThemeData(
+          backgroundColor: AppColors.primary,
+          foregroundColor: Colors.white,
+          elevation: 4,
+          shape: CircleBorder(),
+        ),
+        bottomNavigationBarTheme: const BottomNavigationBarThemeData(
+          backgroundColor: AppColors.cardWhite,
+          selectedItemColor: AppColors.primary,
+          unselectedItemColor: AppColors.textLight,
+          type: BottomNavigationBarType.fixed,
+          elevation: 8,
+        ),
+        pageTransitionsTheme: const PageTransitionsTheme(
+          builders: {
+            TargetPlatform.android: ZoomPageTransitionsBuilder(),
+            TargetPlatform.iOS: CupertinoPageTransitionsBuilder(),
+          },
+        ),
+      ),
+      home: const MainShell(),
+    );
+  }
+}
+
+/// iOS / Android 自适应滚动行为
+class _PlatformScrollBehavior extends MaterialScrollBehavior {
+  const _PlatformScrollBehavior();
+
+  @override
+  Widget buildScrollbar(
+    BuildContext context,
+    Widget child,
+    ScrollableDetails details,
+  ) {
+    if (Platform.isIOS) return child;
+    return super.buildScrollbar(context, child, details);
+  }
+
+  @override
+  ScrollPhysics getScrollPhysics(BuildContext context) {
+    return Platform.isIOS
+        ? const BouncingScrollPhysics(
+            parent: AlwaysScrollableScrollPhysics())
+        : super.getScrollPhysics(context);
+  }
+}
