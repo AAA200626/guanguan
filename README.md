@@ -1,3 +1,16 @@
+# Guanguan — Savings App
+
+A Flutter-based Android savings app. Built-in savings challenges with daily check-in, plus savings-plan recommendations based on income. Apple-minimal design with a macaron mint-lime palette.
+
+- **Platform**: Android (Flutter, extensible to iOS)
+- **Tech stack**: Flutter 3 · Dart · Riverpod · SQLite (sqflite) · fl_chart
+- **Run**: `cd src/jar_jar && flutter pub get && flutter run`
+- **Download signed release APK**: see [Releases](../../releases)
+- **Status**: skeleton / work in progress
+- **Note**: The README below is in Chinese.
+
+---
+
 # 罐罐 — 存钱 App
 
 > 把每一块钱，存进梦想的罐子 🫙
